@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BookTcpServer
 {
     class Program
     {
-        private static List<Book> Books = new List<Book>();
+        private static List<String> Books = new List<String>();
 
         static void Main(string[] args)
         {
@@ -82,22 +83,36 @@ namespace BookTcpServer
         private static string GetAll()
         {
             Console.WriteLine("See below all the books from the list:");
-            foreach(Book book in Books)
+            List<Book> deserializedBooks = new List<Book>();
+            foreach (String b in Books)
+            {               
+                Book fromJsonBook = JsonSerializer.Deserialize<Book>(b);
+                deserializedBooks.Add(fromJsonBook);
+            }
+
+            foreach(Book book in deserializedBooks)
             {
                 return $"Title: {book.Title}, ISBN: {book.ISBN13}, Author: {book.Author}, Number of Pages: {book.PageNumber}\n";
             }
-            return "Failed";
+            return "Failed to display books";        
         }
 
         private static Book Get(string isbn)
         {
-            return Books.Find(book => book.ISBN13 == isbn);
+            List<Book> deserializedBooks = new List<Book>();
+            foreach (String b in Books)
+            {
+                Book fromJsonBook = JsonSerializer.Deserialize<Book>(b);
+                deserializedBooks.Add(fromJsonBook);
+            }
+            return deserializedBooks.Find(book => book.ISBN13 == isbn);
         }
 
         private static void Add(string isbn, string title, string author, int pages)
         {
             Book book = new Book(isbn, title, author, pages);
-            Books.Add(book);
+            string serializedBook = JsonSerializer.Serialize(book);
+            Books.Add(serializedBook);
         }
     }
 }
